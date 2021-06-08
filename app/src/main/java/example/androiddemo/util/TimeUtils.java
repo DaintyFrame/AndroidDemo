@@ -1,244 +1,273 @@
 package example.androiddemo.util;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 /**
  * 
- * @author brucezee 2013-3-1 下午8:56:40
+ * 	时间相关的工具类
  */
 public class TimeUtils {
-
-
-	public static final long MILLIS_OF_SECOND = 1000L;
-	public static final long MILLIS_OF_MINUTE = 60*MILLIS_OF_SECOND;
-	public static final long MILLIS_OF_HOUR = 60*MILLIS_OF_MINUTE;
-	public static final long MILLIS_OF_DAY = 24*MILLIS_OF_HOUR;
-	public static final long MILLIS_OF_WEEK = 7*MILLIS_OF_DAY;
-	public static final long ROUGH_MILLIS_OF_MONTH = 30*MILLIS_OF_DAY;
-	
-	/**
-	 * 获取一个毫秒数对应的天数的整数值
-	 */
-	public static int getDayCount(long millis) {
-		return (int) ((millis+MILLIS_OF_HOUR*8) / MILLIS_OF_DAY)+1;
+	private TimeUtils() {
+		throw new UnsupportedOperationException("u can't fuck me...");
 	}
-	
+	public static final SimpleDateFormat DEFAULT_SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	/**
-	 * 获取当前时间毫秒数对应的天数的整数值
+	 * 各时间单位与毫秒的倍数
+	 * 	 UNIT_MSEC:毫秒
+	 *   UNIT_SEC :秒
+	 *   UNIT_MIN :分
+	 *   UNIT_HOUR:小时
+	 *   UNIT_DAY :天
 	 */
-	public static int getTodayDayCount() {
-		return getDayCount(System.currentTimeMillis());
-	}
+	public static final int UNIT_MSEC = 1;
+	public static final int UNIT_SEC = 1000;
+	public static final int UNIT_MIN = 60000;
+	public static final int UNIT_HOUR = 3600000;
+	public static final int UNIT_DAY = 86400000;
 
 	/**
-	 * 获取时间的初略描述
+	 * 将时间戳转为时间字符串
+	 * <p>格式为yyyy-MM-dd HH:mm:ss</p>
+	 *
+	 * @param milliseconds 毫秒时间戳
+	 * @return 时间字符串
 	 */
-	public static String getRoughTimeText(Long millisTime) {
-		long millis = System.currentTimeMillis() - NumberUtils.valueOf(millisTime);
-		if (millis < MILLIS_OF_MINUTE) {
-			return "刚刚";
-		}
-		StringBuilder sb = new StringBuilder();
-		if (millis < MILLIS_OF_HOUR) {
-			sb.append((int) (millis/MILLIS_OF_MINUTE)).append("分钟");
-		}
-		else if (millis < MILLIS_OF_DAY) {
-			sb.append((int) (millis/MILLIS_OF_HOUR)).append("小时");
-		}
-		else if (millis < MILLIS_OF_WEEK) {
-			sb.append((int) (millis/MILLIS_OF_DAY)).append("天");
-		}
-		else if (millis < ROUGH_MILLIS_OF_MONTH) {
-			sb.append((int) (millis/MILLIS_OF_WEEK)).append("周");
-		}
-		else {
-			sb.append((int) (millis/ROUGH_MILLIS_OF_MONTH)).append("月");
-		}
-		sb.append("前");
-		return sb.toString();
+	public static String milliseconds2String(long milliseconds) {
+		return milliseconds2String(milliseconds, DEFAULT_SDF);
 	}
-	
+
 	/**
-	 * 获取毫秒的时间描述如：1天23小时15分4秒
+	 * 将时间戳转为时间字符串
+	 * @param milliseconds 毫秒时间戳
+	 * @param format       时间格式
+	 * @return 时间字符串
 	 */
-	public static String formatMilliseconds(long millis) {
-		StringBuilder sb = new StringBuilder();
-		if (millis < 1000) {
-			sb.append(millis).append("毫秒");
-		}
-		else if (millis < MILLIS_OF_MINUTE) {
-			sb.append((int) (millis/1000)).append("秒");
-			if (millis % 1000 != 0) {
-				sb.append(formatMilliseconds(millis % 1000));
-			}
-		}
-		else if (millis < MILLIS_OF_HOUR) {
-			sb.append((int) (millis/MILLIS_OF_MINUTE)).append("分");
-			if (millis % MILLIS_OF_MINUTE != 0) {
-				sb.append(formatMilliseconds(millis % MILLIS_OF_MINUTE));
-			}
-		}
-		else if (millis < MILLIS_OF_DAY) {
-			sb.append((int) (millis/MILLIS_OF_HOUR)).append("小时");
-			if (millis % MILLIS_OF_HOUR != 0) {
-				sb.append(formatMilliseconds(millis % MILLIS_OF_HOUR));
-			}
-		}
-		else if (millis < MILLIS_OF_WEEK) {
-			sb.append((int) (millis/MILLIS_OF_DAY)).append("天");
-			if (millis % MILLIS_OF_DAY != 0) {
-				sb.append(formatMilliseconds(millis % MILLIS_OF_DAY));
-			}
-		}
-		else if (millis < ROUGH_MILLIS_OF_MONTH) {
-			sb.append((int) (millis/MILLIS_OF_WEEK)).append("周");
-			if (millis % MILLIS_OF_WEEK != 0) {
-				sb.append(formatMilliseconds(millis % MILLIS_OF_WEEK));
-			}
-		}
-		else {
-			sb.append((int) (millis/ROUGH_MILLIS_OF_MONTH)).append("月");
-			if (millis % ROUGH_MILLIS_OF_MONTH != 0) {
-				sb.append(formatMilliseconds(millis % ROUGH_MILLIS_OF_MONTH));
-			}
-		}
-		return sb.toString();
+	public static String milliseconds2String(long milliseconds, SimpleDateFormat format) {
+		return format.format(new Date(milliseconds));
 	}
-	
+
 	/**
-	 * 获取距离指定时间指定毫秒数的时间
+	 * 将时间字符串转为时间戳
+	 * @param time 时间字符串
+	 * @return 毫秒时间戳
 	 */
-	public static Date getNewDate(Date fromDate, long millis) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(fromDate.getTime() + millis);
-		return calendar.getTime();
+	public static long string2Milliseconds(String time) {
+		return string2Milliseconds(time, DEFAULT_SDF);
 	}
-	
+
 	/**
-	 * 获取当前月的格式化字符串如：201309
+	 * 将时间字符串转为时间戳
+	 * @param time   时间字符串
+	 * @param format 时间格式
+	 * @return 毫秒时间戳
 	 */
-	public static String getCurrentMonthCode() {
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMM");
-		return simpleDateFormat.format(Calendar.getInstance().getTime());
-	}
-	
-	/**
-	 * 获取上n个月的格式化字符串如：201309
-	 */
-	public static String getLastMonthCode(int n) {
-		if (n > 11) {
-			throw new IllegalArgumentException("n must less than 12");
-		}
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMM");
-		Calendar calendar = Calendar.getInstance();
-		calendar.get(Calendar.YEAR);
-		//Calendar中月份从0开始
-		int year = calendar.get(Calendar.YEAR);
-		int currentMonth = calendar.get(Calendar.MONTH);
-		int month = 0;
-		int x = currentMonth - n;
-		if (x >= 0) {
-			month = x;
-		}
-		else {
-			month = x + 12;
-			year = year - 1;
-		}
-		calendar.set(Calendar.MILLISECOND, 0);
-		calendar.set(year, month, 15, 0, 0, 0);
-		return simpleDateFormat.format(calendar.getTime());
-	}
-	/**
-	 * 格式化时间
-	 * @param timeMillis 时间毫秒数
-	 * @param pattern 时间格式字符串 如：yyyy-MM-dd HH:mm:ss
-	 * @return 指定格式的时间字符串
-	 */
-	public static String formatTime(Long timeMillis, String pattern) {
-		if (timeMillis == null) timeMillis = 0l;
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(timeMillis);
-		return formatTime(calendar.getTime(), pattern);
-	}
-	
-	/**
-	 * 格式化时间
-	 * @param time 日期
-	 * @param pattern 时间格式字符串 如：yyyy-MM-dd HH:mm:ss
-	 * @return 指定格式的时间字符串
-	 */
-	public static String formatTime(Date time, String pattern) {
-		if(time != null && pattern != null){
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-			return simpleDateFormat.format(time);
-		}
-		return "";
-	}
-	
-	/**
-	 * 获取当前时间
-	 */
-	public static Date getTime() {
-		return new Date();
-	}
-	
-	/**
-	 * 转换日期字符串为日期对象
-	 * @param timeText 日期字符串
-	 * @param pattern 日期格式（如yyyy-MM-dd HH:mm:ss）
-	 * @return 成功返回日期对象，失败返回null。
-	 */
-	public static Date parseDate(String timeText, String pattern) {
+	public static long string2Milliseconds(String time, SimpleDateFormat format) {
 		try {
-			return new SimpleDateFormat(pattern).parse(timeText);
-		}
-		catch (Exception e) {
+			return format.parse(time).getTime();
+		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return -1;
 	}
-	
+
 	/**
-	 * 转换日期字符串为时间毫秒数
-	 * @param timeText 日期字符串
-	 * @param pattern 日期格式（如yyyy-MM-dd HH:mm:ss）
-	 * @return 成功返回时间毫秒数，失败返回null。
+	 * 将时间字符串转为Date类型
+	 * <p>格式为yyyy-MM-dd HH:mm:ss</p>
+	 * @param time 时间字符串
+	 * @return Date类型
 	 */
-	public static Long parseTime(String timeText, String pattern) {
-		Date date = parseDate(timeText, pattern);
-		if (date != null) {
-			return date.getTime();
+	public static Date string2Date(String time) {
+		return string2Date(time, DEFAULT_SDF);
+	}
+	/**
+	 * 将时间字符串转为Date类型
+	 * @param time   时间字符串
+	 * @param format 时间格式
+	 * @return Date类型
+	 */
+	public static Date string2Date(String time, SimpleDateFormat format) {
+		return new Date(string2Milliseconds(time, format));
+	}
+
+	/**
+	 * 将Date类型转为时间字符串
+	 * @param time Date类型时间
+	 * @return 时间字符串
+	 */
+	public static String date2String(Date time) {
+		return date2String(time, DEFAULT_SDF);
+	}
+
+	/**
+	 * 将Date类型转为时间字符串
+	 * @param time   Date类型时间
+	 * @param format 时间格式
+	 * @return 时间字符串
+	 */
+	public static String date2String(Date time, SimpleDateFormat format) {
+		return format.format(time);
+	}
+
+	/**
+	 * 将Date类型转为时间戳
+	 * @param time Date类型时间
+	 * @return 毫秒时间戳
+	 */
+	public static long date2Milliseconds(Date time) {
+		return time.getTime();
+	}
+
+	/**
+	 * 将时间戳转为Date类型
+	 * @param milliseconds 毫秒时间戳
+	 * @return Date类型时间
+	 */
+	public static Date milliseconds2Date(long milliseconds) {
+		return new Date(milliseconds);
+	}
+
+	/**
+	 * 毫秒时间戳单位转换（单位：unit）
+	 * @param milliseconds 毫秒时间戳
+	 * @param unit
+	 * @return unit时间戳
+	 */
+	private static long milliseconds2Unit(long milliseconds, int unit) {
+		switch (unit) {
+			case UNIT_MSEC:
+			case UNIT_SEC:
+			case UNIT_MIN:
+			case UNIT_HOUR:
+			case UNIT_DAY:
+				return Math.abs(milliseconds) / unit;
 		}
-		return null;
+		return -1;
 	}
-	
+
 	/**
-	 * 获取一个日期的“日”
+	 * 获取两个时间差（单位：unit）
+	 * <p>time1和time2格式都为yyyy-MM-dd HH:mm:ss</p>
+	 * @param time1 时间字符串1
+	 * @param time2 时间字符串2
+	 * @param unit
+	 * @return unit时间戳
 	 */
-	public static int getDayOfMonth(Date date) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		return calendar.get(Calendar.DAY_OF_MONTH);
+	public static long getIntervalTime(String time1, String time2, int unit) {
+		return getIntervalTime(time1, time2, unit, DEFAULT_SDF);
 	}
-	
+
 	/**
-	 * 获取一个日期的当月的天数
+	 * 获取两个时间差（单位：unit）
+	 * <p>time1和time2格式都为format</p>
+	 *
+	 * @param time1  时间字符串1
+	 * @param time2  时间字符串2
+	 * @param unit
+	 * @param format 时间格式
+	 * @return unit时间戳
 	 */
-	public static int getDayCountOfMonth(Date date) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+	public static long getIntervalTime(String time1, String time2, int unit, SimpleDateFormat format) {
+		return milliseconds2Unit(string2Milliseconds(time1, format)
+				- string2Milliseconds(time2, format), unit);
 	}
+
 	/**
-	 * 获取一个日期是星期几
-	 * @param date
-	 * @return
+	 * 获取两个时间差（单位：unit）
+	 * <p>time1和time2都为Date类型</p>
+	 *
+	 * @param time1 Date类型时间1
+	 * @param time2 Date类型时间2
+	 * @param unit
+	 * @return unit时间戳
 	 */
-	public static int getDayOfWeek(Date date){
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		return calendar.get(Calendar.DAY_OF_WEEK);
+	public static long getIntervalTime(Date time1, Date time2, int unit) {
+		return milliseconds2Unit(date2Milliseconds(time2) - date2Milliseconds(time1), unit);
 	}
+
+	/**
+	 * 获取当前时间
+	 * @return 毫秒时间戳
+	 */
+	public static long getCurTimeMills() {
+		return System.currentTimeMillis();
+	}
+
+	/**
+	 * 获取当前时间
+	 * <p>格式为yyyy-MM-dd HH:mm:ss</p>
+	 * @return 时间字符串
+	 */
+	public static String getCurTimeString() {
+		return milliseconds2String(getCurTimeMills());
+	}
+
+	/**
+	 * 获取当前时间
+	 * <p>格式为用户自定义</p>
+	 * @param format 时间格式
+	 * @return 时间字符串
+	 */
+	public static String getCurTimeString(SimpleDateFormat format) {
+		return milliseconds2String(getCurTimeMills(), format);
+	}
+
+	/**
+	 * 获取当前时间
+	 * <p>Date类型</p>
+	 * @return Date类型时间
+	 */
+	public static Date getCurTimeDate() {
+		return new Date();
+	}
+
+	/**
+	 * 获取与当前时间的差（单位：unit）
+	 * <p>time格式为yyyy-MM-dd HH:mm:ss</p>
+	 *
+	 * @param time 时间字符串
+	 * @param unit
+	 * @return unit时间戳
+	 */
+	public static long getIntervalByNow(String time, int unit) {
+		return getIntervalByNow(time, unit, DEFAULT_SDF);
+	}
+
+	/**
+	 * 获取与当前时间的差（单位：unit）
+	 * <p>time格式为format</p>
+	 *
+	 * @param time   时间字符串
+	 * @param unit
+	 * @param format 时间格式
+	 * @return unit时间戳
+	 */
+	public static long getIntervalByNow(String time, int unit, SimpleDateFormat format) {
+		return getIntervalTime(getCurTimeString(), time, unit, format);
+	}
+
+	/**
+	 * 获取与当前时间的差（单位：unit）
+	 * <p>time为Date类型</p>
+	 *
+	 * @param time Date类型时间
+	 * @param unit
+	 * @return unit时间戳
+	 */
+	public static long getIntervalByNow(Date time, int unit) {
+		return getIntervalTime(getCurTimeDate(), time, unit);
+	}
+
+	/**
+	 * 判断闰年
+	 * @param year 年份
+	 * @return true: 闰年<br>false: 平年
+	 */
+	public static boolean isLeapYear(int year) {
+		return year % 4 == 0 && year % 100 != 0 || year % 400 == 0;
+	}
+
+
 }

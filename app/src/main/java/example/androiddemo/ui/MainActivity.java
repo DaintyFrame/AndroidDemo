@@ -1,11 +1,11 @@
 package example.androiddemo.ui;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import example.androiddemo.R;
-import example.androiddemo.ui.BaseActivity;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
